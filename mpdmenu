@@ -26,9 +26,10 @@ d_artist() {
 
 d_album() {
     local artist="$1"
+    local genre="$2"
     local albums
 
-    mapfile -t albums < <(mpc list album artist "$artist")
+    mapfile -t albums < <(mpc list album artist "$artist" genre "$genre")
     if (( ${#albums[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -73,7 +74,7 @@ case "$mode" in
         artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
 
-        album=$(d_album "$artist")
+        album=$(d_album "$artist" "$genre")
         [[ $album ]] || exit 2
 
         mpc clear
