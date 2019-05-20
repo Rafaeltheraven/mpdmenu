@@ -4,7 +4,7 @@ all_name='[ALL]'
 mode=library
 
 d_genre() {
-    mpc list genre | sort -f | dmenu -p genre "${dmenu_args[@]}"
+    mpc list genre | sort -f | dmenu -p Genre "${dmenu_args[@]}"
 }
 
 
@@ -12,12 +12,12 @@ d_artist() {
     local genre="$1"
     local artists
 
-    mapfile -t artists < <(mpc list artist genre "$genre")
+    mapfile -t artists < <(mpc list albumartist genre "$genre")
     if (( ${#artists[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
             printf '%s\n' "${artists[@]}" | sort -f
-        } | dmenu -p artist "${dmenu_args[@]}"
+        } | dmenu -p Artist "${dmenu_args[@]}"
     else
         # We only have one artist, so just use that.
         printf '%s\n' "${artists[0]}"
@@ -33,7 +33,7 @@ d_album() {
         {
             printf '%s\n' "$all_name"
             printf '%s\n' "${albums[@]}" | sort -f
-        } | dmenu -p album "${dmenu_args[@]}"
+        } | dmenu -p Album "${dmenu_args[@]}"
     else
         # We only have one album, so just use that.
         printf '%s\n' "${albums[0]}"
@@ -44,7 +44,7 @@ d_playlist() {
     local format="%position% - %title% - %album% - %artist%"
     local track
 
-    track=$(mpc playlist -f "$format" | dmenu -p track "${dmenu_args[@]}")
+    track=$(mpc playlist -f "$format" | dmenu -p Track "${dmenu_args[@]}")
     printf '%s' "${track%% *}"
 }
 
