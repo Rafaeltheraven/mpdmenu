@@ -3,8 +3,25 @@
 all_name='[ALL]'
 mode=library
 
+d_genre() {
+    mpc list genre | sort -f | dmenu -p genre "${dmenu_args[@]}"
+}
+
+
 d_artist() {
-    mpc list artist | sort -f | dmenu -p artist "${dmenu_args[@]}"
+    local genre="$1"
+    local artists
+
+    mapfile -t artists < <(mpc list artist genre "$genre")
+    if (( ${#artists[@]} > 1 )) ; then
+        {
+            printf '%s\n' "$all_name"
+            printf '%s\n' "${artists[@]}" | sort -f
+        } | dmenu -p artist "${dmenu_args[@]}"
+    else
+        # We only have one artist, so just use that.
+        printf '%s\n' "${artists[0]}"
+    fi
 }
 
 d_album() {
@@ -49,7 +66,11 @@ done
 
 case "$mode" in
     library)
-        artist=$(d_artist)
+	
+        genre=$(d_genre)
+        [[ $genre ]] || exit 1
+	
+        artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
 
         album=$(d_album "$artist")
