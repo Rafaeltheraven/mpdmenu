@@ -4,7 +4,18 @@ all_name='[ALL]'
 mode=library
 
 d_genre() {
-    mpc list genre | sort -f | dmenu -p Genre "${dmenu_args[@]}"
+
+    	mapfile -t genres < <(mpc list genre)
+    if (( ${#genres[@]} > 1 )) ; then
+	{
+            printf '%s\n' "$all_name"
+            printf '%s\n' "${genres[@]}" | sort -f
+		
+	} | sort -f | dmenu -p Genre "${dmenu_args[@]}"
+    else
+        # We only have one artist, so just use that.
+        printf '%s\n' "${genres[0]}"
+    fi
 }
 
 
@@ -12,7 +23,12 @@ d_artist() {
     local genre="$1"
     local artists
 
-    mapfile -t artists < <(mpc list albumartist genre "$genre")
+    mapfile -t artists < <(
+        if [[ $genre == "$all_name" ]]; then
+            mpc list artist  | sort
+        else
+            mpc list artist genre "$genre" | sort
+	    fi)
     if (( ${#artists[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -25,11 +41,22 @@ d_artist() {
 }
 
 d_album() {
-    local artist="$1"
-    local genre="$2"
-    local albums
+    local genre="$1"
+    local artist="$2"
 
-    mapfile -t albums < <(mpc list album artist "$artist" genre "$genre")
+    local albums
+    
+    local filters=""
+
+    if [[ "$genre" != "$all_name" ]]; then
+	    filters="$filters"+" genre ""$genre"
+    fi
+    if [[ "$artist" != "$all_name" ]]; then
+	    filters="$filters"+" artist ""$artist"
+    fi
+
+    mapfile -t albums < <(mpc list album"$filters")
+
     if (( ${#albums[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -42,9 +69,24 @@ d_album() {
 }
 
 d_title() {
-    local album="$1"
+    local genre="$1"
+    local artist="$2"
+    local album="$3"
     local titles
-    mapfile -t titles < <(mpc list title album "$album")
+
+    local filters=""
+
+    if [[ "$genre" != "$all_name" ]]; then
+	    filters="$filters"+" genre ""$genre"
+    fi
+    if [[ "$artist" != "$all_name" ]]; then
+	    filters="$filters"+" artist ""$artist"
+    fi
+    if [[ "$album" != "$all_name" ]]; then
+	    filters="$filters"+" album ""$album"
+    fi
+
+    mapfile -t titles < <(mpc list title"$filters")
     if (( ${#titles[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -114,10 +156,10 @@ case "$mode" in
         artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
 
-        album=$(d_album "$artist")
+        album=$(d_album "$genre" "$artist")
         [[ $album ]] || exit 1
 
-        title=$(d_title "$album")
+        title=$(d_title "$genre" "$artist" "$album")
         [[ $title ]] || exit 2
 
         if [[ $title == "$all_name" ]]; then
