@@ -4,18 +4,7 @@ all_name='[ALL]'
 mode=library
 
 d_genre() {
-
-    	mapfile -t genres < <(mpc list genre)
-    if (( ${#genres[@]} > 1 )) ; then
-	{
-            printf '%s\n' "$all_name"
-            printf '%s\n' "${genres[@]}" | sort -f
-		
-	} | sort -f | dmenu -p Genre "${dmenu_args[@]}"
-    else
-        # We only have one artist, so just use that.
-        printf '%s\n' "${genres[0]}"
-    fi
+    mpc list genre | sort -f | dmenu -p Genre "${dmenu_args[@]}"
 }
 
 
@@ -23,12 +12,7 @@ d_artist() {
     local genre="$1"
     local artists
 
-    mapfile -t artists < <(
-        if [[ $genre == "$all_name" ]]; then
-            mpc list artist  | sort
-        else
-            mpc list artist genre "$genre" | sort
-	    fi)
+    mapfile -t artists < <(mpc list artist genre "$genre")
     if (( ${#artists[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -41,20 +25,10 @@ d_artist() {
 }
 
 d_album() {
-    local genre="$1"
-    local artist="$2"
+    local artist="$1"
     local albums
-    
-    local filters=""
 
-    if [[ "$genre" != "$all_name" ]]; then
-	    filters="$filters"+" genre ""$genre"
-    fi
-    if [[ "$artist" != "$all_name" ]]; then
-	    filters="$filters"+" artist ""$artist"
-    fi
-
-    mapfile -t albums < <(mpc list album"$filters")
+    mapfile -t albums < <(mpc list album artist "$artist")
     if (( ${#albums[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -67,24 +41,9 @@ d_album() {
 }
 
 d_title() {
-    local genre="$1"
-    local artist="$2"
-    local album="$3"
+    local album="$1"
     local titles
-
-    local filters=""
-
-    if [[ "$genre" != "$all_name" ]]; then
-	    filters="$filters"+" genre ""$genre"
-    fi
-    if [[ "$artist" != "$all_name" ]]; then
-	    filters="$filters"+" artist ""$artist"
-    fi
-    if [[ "$album" != "$all_name" ]]; then
-	    filters="$filters"+" album ""$album"
-    fi
-
-    mapfile -t titles < <(mpc list title"$filters")
+    mapfile -t titles < <(mpc list title album "$album")
     if (( ${#titles[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -153,10 +112,10 @@ case "$mode" in
         artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
 
-        album=$(d_album "$genre" "$artist")
+        album=$(d_album "$artist")
         [[ $album ]] || exit 1
 
-        title=$(d_title "$genre" "$artist" "$album")
+        title=$(d_title "$album")
         [[ $title ]] || exit 2
 
         if [[ $title == "$all_name" ]]; then
