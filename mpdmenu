@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 all_name='[ALL]'
 mode=library
@@ -45,17 +45,23 @@ d_album() {
     local artist="$2"
 
     local albums
-    
-    local filters=""
+
+    local filters="("
 
     if [[ "$genre" != "$all_name" ]]; then
-	    filters="$filters"+" genre ""$genre"
+	    filters="$filters (genre == \"$genre\")"
     fi
     if [[ "$artist" != "$all_name" ]]; then
-	    filters="$filters"+" artist ""$artist"
+    	if [[ "$filters" != "(" ]]; then
+	    filters="$filters AND (artist == \"$artist\")"
+	else
+	    filters="$filters (artist == \"$artist\")"
+	fi
     fi
 
-    mapfile -t albums < <(mpc list album"$filters")
+    filters="${filters})"
+
+    mapfile -t albums < <(mpc list album "$filters" | sort)
 
     if (( ${#albums[@]} > 1 )) ; then
         {
@@ -74,19 +80,28 @@ d_title() {
     local album="$3"
     local titles
 
-    local filters=""
+    local filters="("
 
     if [[ "$genre" != "$all_name" ]]; then
-	    filters="$filters"+" genre ""$genre"
+	    filters="$filters (genre == \"$genre\")"
     fi
     if [[ "$artist" != "$all_name" ]]; then
-	    filters="$filters"+" artist ""$artist"
+    	if [[ "$filters" != "(" ]]; then
+	    filters="$filters AND (artist == \"$artist\")"
+	else
+	    filters="$filters (artist == \"$artist\")"
+	fi
     fi
     if [[ "$album" != "$all_name" ]]; then
-	    filters="$filters"+" album ""$album"
+    	if [[ "$filters" != "(" ]]; then
+	    filters="$filters AND (album == \"$album\")"
+	else
+	    filters="$filters (album == \"$album\")"
+	fi
     fi
 
-    mapfile -t titles < <(mpc list title"$filters")
+    filters="${filters})"
+    mapfile -t titles < <(mpc list title "$filters")
     if (( ${#titles[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
@@ -131,13 +146,13 @@ case "$mode" in
 	
         genre=$(d_genre)
         [[ $genre ]] || exit 1
-	
+	echo "Just did genre"
         artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
-
-        album=$(d_album "$artist" "$genre")
+	echo "Just did artist"
+        album=$(d_album "$genre" "$artist")
         [[ $album ]] || exit 2
-
+	echo "$album"
         if [[ $album == "$all_name" ]]; then
             mpc find artist "$artist" | sort | mpc add
         else
@@ -152,7 +167,7 @@ case "$mode" in
     title)
         genre=$(d_genre)
         [[ $genre ]] || exit 1
-	
+
         artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
 
