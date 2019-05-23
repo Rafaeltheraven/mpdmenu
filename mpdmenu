@@ -143,16 +143,16 @@ done
 
 case "$mode" in
     library)
-	
+
         genre=$(d_genre)
         [[ $genre ]] || exit 1
-	echo "Just did genre"
+	"
         artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
-	echo "Just did artist"
+
         album=$(d_album "$genre" "$artist")
         [[ $album ]] || exit 2
-	echo "$album"
+
         if [[ $album == "$all_name" ]]; then
             mpc find artist "$artist" | sort | mpc add
         else
