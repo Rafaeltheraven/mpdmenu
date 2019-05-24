@@ -146,7 +146,7 @@ case "$mode" in
 
         genre=$(d_genre)
         [[ $genre ]] || exit 1
-	"
+
         artist=$(d_artist "$genre")
         [[ $artist ]] || exit 1
 
