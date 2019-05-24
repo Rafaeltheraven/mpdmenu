@@ -11,7 +11,7 @@ d_genre() {
             printf '%s\n' "$all_name"
             printf '%s\n' "${genres[@]}" | sort -f
 		
-	} | sort -f | dmenu -p Genre "${dmenu_args[@]}"
+	} | dmenu -p Genre "${dmenu_args[@]}"
     else
         # We only have one artist, so just use that.
         printf '%s\n' "${genres[0]}"
