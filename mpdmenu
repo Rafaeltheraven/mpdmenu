@@ -61,6 +61,10 @@ d_album() {
 
     filters="${filters})"
 
+    if [[ "$filters" == "()" ]]; then
+    	filters=""
+    fi
+
     mapfile -t albums < <(mpc list album "$filters" | sort)
 
     if (( ${#albums[@]} > 1 )) ; then
@@ -101,6 +105,10 @@ d_title() {
     fi
 
     filters="${filters})"
+
+    if [[ "$filters" == "()" ]]; then
+    	filters=""
+    fi
     mapfile -t titles < <(mpc list title "$filters")
     if (( ${#titles[@]} > 1 )) ; then
         {
