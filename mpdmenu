@@ -2,6 +2,7 @@
 
 all_name='[ALL]'
 mode=library
+artistTag="artist"
 
 d_genre() {
 
@@ -25,9 +26,17 @@ d_artist() {
 
     mapfile -t artists < <(
         if [[ $genre == "$all_name" ]]; then
-            mpc list artist  | sort
+        	if [[ "$artistTag" == "albumartist" ]]; then
+        		mpc list albumartist | sort
+        	else
+            		mpc list artist  | sort
+            	fi
         else
-            mpc list artist genre "$genre" | sort
+        	if [[ "$artistTag" == "albumartist" ]]; then
+        		mpc list albumartist genre "$genre" | sort
+        	else
+            		mpc list artist genre "$genre" | sort
+            	fi
 	    fi)
     if (( ${#artists[@]} > 1 )) ; then
         {
@@ -53,9 +62,9 @@ d_album() {
     fi
     if [[ "$artist" != "$all_name" ]]; then
     	if [[ "$filters" != "(" ]]; then
-	    filters="$filters AND (artist == \"$artist\")"
+	    filters="$filters AND ($artistTag == \"$artist\")"
 	else
-	    filters="$filters (artist == \"$artist\")"
+	    filters="$filters ($artistTag == \"$artist\")"
 	fi
     fi
 
@@ -91,9 +100,9 @@ d_title() {
     fi
     if [[ "$artist" != "$all_name" ]]; then
     	if [[ "$filters" != "(" ]]; then
-	    filters="$filters AND (artist == \"$artist\")"
+	    filters="$filters AND ($artistTag == \"$artist\")"
 	else
-	    filters="$filters (artist == \"$artist\")"
+	    filters="$filters ($artistTag == \"$artist\")"
 	fi
     fi
     if [[ "$album" != "$all_name" ]]; then
@@ -144,6 +153,7 @@ for arg do
         -l) mode=library ;;
         -p) mode=playlist ;;
 	-t) mode=title ;;
+	-a) artistTag="albumartist" ;; 
     esac
 
     let i++
