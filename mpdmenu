@@ -3,6 +3,7 @@
 all_name='[ALL]'
 mode=library
 artistTag="artist"
+clear=False
 
 d_genre() {
 
@@ -123,7 +124,7 @@ d_title() {
         {
             printf '%s\n' "$all_name"
             printf '%s\n' "${titles[@]}" | sort -f
-        } | dmenu -p Album "${dmenu_args[@]}"
+        } | dmenu -p Title "${dmenu_args[@]}"
     else
         # We only have one title, so just use that.
         printf '%s\n' "${titles[0]}"
@@ -154,6 +155,7 @@ for arg do
         -p) mode=playlist ;;
 	-t) mode=title ;;
 	-a) artistTag="albumartist" ;; 
+	-c) clear=True ;;
     esac
 
     let i++
@@ -171,11 +173,28 @@ case "$mode" in
         album=$(d_album "$genre" "$artist")
         [[ $album ]] || exit 2
 
-        if [[ $album == "$all_name" ]]; then
-            mpc find artist "$artist" | sort | mpc add
-        else
-            mpc find artist "$artist" album "$album" | sort | mpc add
+	filters="("
+	if [[ "$artist" != "$all_name" ]]; then
+		filters="$filters ($artistTag == \"$artist\")"
+	fi
+	if [[ "$album" != "$all_name" ]]; then
+		if [[ "$filters" != "(" ]]; then
+			filters="$filters AND"
+		fi
+		filters="$filters (album == \"$album\")"
+	fi
+
+	if [[ $clear == True ]]; then
+        	mpc clear
         fi
+
+        filters="${filters})"
+
+	if [[ "$filters" != "()" ]]; then
+		mpc find "$filters" | mpc add
+	else
+		mpc add / | mpc add
+	fi
 
         mpc play >/dev/null 2>&1
     ;;
@@ -195,11 +214,29 @@ case "$mode" in
         title=$(d_title "$genre" "$artist" "$album")
         [[ $title ]] || exit 2
 
-        if [[ $title == "$all_name" ]]; then
-            mpc find album "$album" | sort | mpc add
-        else
-            mpc find album "$album" title "$title" | sort | mpc add
+	filters="("
+	if [[ "$album" != "$all_name" ]]; then
+		filters="$filters (album == \"$album\")"
+	fi
+	if [[ "$title" != "$all_name" ]]; then
+		if [[ "$filters" != "(" ]]; then
+			filters="$filters AND"
+		fi
+		filters="$filters (title == \"$title\")"
+	fi
+
+	if [[ $clear == True ]]; then
+        	mpc clear
         fi
+
+	filters="${filters})"
+
+	if [[ "$filters" != "()" ]]; then
+		mpc find "$filters" | sort | mpc add
+	else
+		mpc add /
+	fi
+
         mpc play >/dev/null 2>&1
     ;;
 esac
