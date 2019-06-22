@@ -5,133 +5,8 @@ mode=library
 artistTag="artist"
 clear=False
 
-d_genre() {
-
-    	mapfile -t genres < <(mpc list genre)
-    if (( ${#genres[@]} > 1 )) ; then
-	{
-            printf '%s\n' "$all_name"
-            printf '%s\n' "${genres[@]}" | sort -f
-		
-	} | dmenu -p Genre "${dmenu_args[@]}"
-    else
-        # We only have one artist, so just use that.
-        printf '%s\n' "${genres[0]}"
-    fi
-}
-
-
-d_artist() {
-    local genre="$1"
-    local artists
-
-    mapfile -t artists < <(
-        if [[ $genre == "$all_name" ]]; then
-        	if [[ "$artistTag" == "albumartist" ]]; then
-        		mpc list albumartist | sort
-        	else
-            		mpc list artist  | sort
-            	fi
-        else
-        	if [[ "$artistTag" == "albumartist" ]]; then
-        		mpc list albumartist genre "$genre" | sort
-        	else
-            		mpc list artist genre "$genre" | sort
-            	fi
-	    fi)
-    if (( ${#artists[@]} > 1 )) ; then
-        {
-            printf '%s\n' "$all_name"
-            printf '%s\n' "${artists[@]}" | sort -f
-        } | dmenu -p Artist "${dmenu_args[@]}"
-    else
-        # We only have one artist, so just use that.
-        printf '%s\n' "${artists[0]}"
-    fi
-}
-
-d_album() {
-    local genre="$1"
-    local artist="$2"
-
-    local albums
-
-    local filters="("
-
-    if [[ "$genre" != "$all_name" ]]; then
-	    filters="$filters (genre == \"$genre\")"
-    fi
-    if [[ "$artist" != "$all_name" ]]; then
-    	if [[ "$filters" != "(" ]]; then
-	    filters="$filters AND ($artistTag == \"$artist\")"
-	else
-	    filters="$filters ($artistTag == \"$artist\")"
-	fi
-    fi
-
-    filters="${filters})"
-
-    if [[ "$filters" == "()" ]]; then
-    	filters=""
-    fi
-
-    mapfile -t albums < <(mpc list album "$filters" | sort)
-
-    if (( ${#albums[@]} > 1 )) ; then
-        {
-            printf '%s\n' "$all_name"
-            printf '%s\n' "${albums[@]}" | sort -f
-        } | dmenu -p Album "${dmenu_args[@]}"
-    else
-        # We only have one album, so just use that.
-        printf '%s\n' "${albums[0]}"
-    fi
-}
-
-d_title() {
-    local genre="$1"
-    local artist="$2"
-    local album="$3"
-    local titles
-
-    local filters="("
-
-    if [[ "$genre" != "$all_name" ]]; then
-	    filters="$filters (genre == \"$genre\")"
-    fi
-    if [[ "$artist" != "$all_name" ]]; then
-    	if [[ "$filters" != "(" ]]; then
-	    filters="$filters AND ($artistTag == \"$artist\")"
-	else
-	    filters="$filters ($artistTag == \"$artist\")"
-	fi
-    fi
-    if [[ "$album" != "$all_name" ]]; then
-    	if [[ "$filters" != "(" ]]; then
-	    filters="$filters AND (album == \"$album\")"
-	else
-	    filters="$filters (album == \"$album\")"
-	fi
-    fi
-
-    filters="${filters})"
-
-    if [[ "$filters" == "()" ]]; then
-    	filters=""
-    fi
-    mapfile -t titles < <(mpc list title "$filters")
-    if (( ${#titles[@]} > 1 )) ; then
-        {
-            printf '%s\n' "$all_name"
-            printf '%s\n' "${titles[@]}" | sort -f
-        } | dmenu -p Title "${dmenu_args[@]}"
-    else
-        # We only have one title, so just use that.
-        printf '%s\n' "${titles[0]}"
-    fi
-}
-
-
+filters="("
+declare -A argarray
 
 d_playlist() {
     local format="%position% - %title% - %album% - %artist%"
@@ -142,7 +17,51 @@ d_playlist() {
 
 }
 
-i=2
+d_show_tag() {
+    local tag="$1"
+    local filter="${filters})"
+    local search
+    local title="${tag^}"
+
+    if [[ "$filter" == "()" ]]; then
+        filter=""
+    fi
+
+    mapfile -t search < <(mpc list $tag "$filter")
+
+    if [[ "$title" == "Albumartist" ]]; then
+        title="AlbumArtist" #Just a special case
+    fi
+
+    if (( ${#search[@]} > 1 )) ; then
+        {
+            printf '%s\n' "$all_name"
+            printf '%s\n' "${search[@]}" | sort -f
+        } | dmenu -p $title "${dmenu_args[@]}"
+    else
+        printf '%s\n' "${search[0]}"
+    fi
+}
+
+d_add_restriction() {
+    local tag="$1"
+    local arg="$2"
+
+    echo $filters
+
+    if [[ "$arg" != "$all_name" ]]; then
+        if [[ "$filters" != "(" ]]; then
+            filters="$filters AND "
+        fi
+
+        filters="$filters ($tag == \"$arg\")"
+    fi
+
+    echo $filters
+
+}
+
+i=0
 
 for arg do
     if [[ $arg == :: ]]; then
@@ -150,93 +69,57 @@ for arg do
         break
     fi
 
+    echo "$i"
+
     case "$arg" in
+        # Mode args
         -l) mode=library ;;
         -p) mode=playlist ;;
-	-t) mode=title ;;
-	-a) artistTag="albumartist" ;; 
-	-c) clear=True ;;
+        -c) clear=True ;;
+        # Sorting args
+    	-t) argarray["$i"]="title" ;;
+    	-a) argarray["$i"]="artist" ;; 
+        -A) argarray["$i"]="albumartist" ;;
+        -al) argarray["$i"]="album" ;;
+        -g) argarray["$i"]="genre" ;;
     esac
 
-    let i++
+    let "i++"
 done
 
 case "$mode" in
     library)
 
-        genre=$(d_genre)
-        [[ $genre ]] || exit 1
+    i=0
+    max=$(( ${#argarray[@]} ))
 
-        artist=$(d_artist "$genre")
-        [[ $artist ]] || exit 1
+    while [[ i -lt max ]]
+    do
+        tag="${argarray[$i]}"
+        arg=$(d_show_tag "$tag")
+        [[ $arg ]] || exit 1
+        d_add_restriction "$tag" "$arg"
+        let "i++"
+    done
 
-        album=$(d_album "$genre" "$artist")
-        [[ $album ]] || exit 2
+    if [[ $clear == True ]]; then
+        mpc clear
+    fi
 
-	filters="("
-	if [[ "$artist" != "$all_name" ]]; then
-		filters="$filters ($artistTag == \"$artist\")"
-	fi
-	if [[ "$album" != "$all_name" ]]; then
-		if [[ "$filters" != "(" ]]; then
-			filters="$filters AND"
-		fi
-		filters="$filters (album == \"$album\")"
-	fi
+    filters="${filters})"
 
-	if [[ $clear == True ]]; then
-        	mpc clear
-        fi
-
-        filters="${filters})"
-
-	if [[ "$filters" != "()" ]]; then
-		mpc find "$filters" | mpc add
-	else
-		mpc add / | mpc add
-	fi
+    if [[ "$filters" != "()" ]]; then
+        mpc find "$filters" | mpc add
+    else
+        mpc add / | mpc add
+    fi
 
         mpc play >/dev/null 2>&1
+
     ;;
+
+
     playlist)
         mpc play "$(d_playlist)"
-    ;;
-    title)
-        genre=$(d_genre)
-        [[ $genre ]] || exit 1
-
-        artist=$(d_artist "$genre")
-        [[ $artist ]] || exit 1
-
-        album=$(d_album "$genre" "$artist")
-        [[ $album ]] || exit 1
-
-        title=$(d_title "$genre" "$artist" "$album")
-        [[ $title ]] || exit 2
-
-	filters="("
-	if [[ "$album" != "$all_name" ]]; then
-		filters="$filters (album == \"$album\")"
-	fi
-	if [[ "$title" != "$all_name" ]]; then
-		if [[ "$filters" != "(" ]]; then
-			filters="$filters AND"
-		fi
-		filters="$filters (title == \"$title\")"
-	fi
-
-	if [[ $clear == True ]]; then
-        	mpc clear
-        fi
-
-	filters="${filters})"
-
-	if [[ "$filters" != "()" ]]; then
-		mpc find "$filters" | sort | mpc add
-	else
-		mpc add /
-	fi
-
-        mpc play >/dev/null 2>&1
     ;;
 esac
