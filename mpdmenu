@@ -109,9 +109,9 @@ case "$mode" in
     filters="${filters})"
 
     if [[ "$filters" != "()" ]]; then
-        mpc find "$filters" | mpc add
+        mpc findadd "$filters"
     else
-        mpc add / | mpc add
+        mpc add /
     fi
 
         mpc play >/dev/null 2>&1
