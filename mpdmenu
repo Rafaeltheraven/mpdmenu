@@ -1,6 +1,7 @@
 #!/bin/bash
 
 all_name='[ALL]'
+back_name='[BACK]'
 mode=library
 artistTag="artist"
 clear=False
@@ -36,6 +37,7 @@ d_show_tag() {
     if (( ${#search[@]} > 1 )) ; then
         {
             printf '%s\n' "$all_name"
+            printf '%s\n' "$back_name"
             printf '%s\n' "${search[@]}" | sort -f
         } | dmenu -p $title "${dmenu_args[@]}"
     else
@@ -59,6 +61,38 @@ d_add_restriction() {
 
     echo $filters
 
+}
+
+d_remove_restriction() {
+    local args="$filters"
+    local argsLength="${#args}"
+    local foundArgs=0
+    local argCount="$1"
+    local filter=""
+    local i=0
+    while [[ i -lt argsLength && foundArgs -lt argCount ]]
+    do
+        local word="${args[$i]}"
+        local wordLength="${#word}"
+        local j=0
+        while [[ j -lt wordLength && foundArgs -lt argCount ]]
+        do
+            local char="${word:j:1}"
+            if [[ "$char" = ")" ]]; then
+                let "foundArgs++"
+            fi
+            filter="$filter$char"
+            let "j++"
+        done
+        if [[ foundArgs -lt argCount ]]; then
+            filter="$filter "
+        fi
+        let "i++"
+    done
+    if [[ "$filter" = "" ]]; then
+        filter="("
+    fi
+    filters="$filter"
 }
 
 i=0
@@ -98,8 +132,18 @@ case "$mode" in
         tag="${argarray[$i]}"
         arg=$(d_show_tag "$tag")
         [[ $arg ]] || exit 1
-        d_add_restriction "$tag" "$arg"
-        let "i++"
+        if [[ "$arg" != "$back_name" ]]; then
+            if [[ "$arg" != "$all_name" ]]; then
+                d_add_restriction "$tag" "$arg"
+            fi
+            let "i++"
+        else
+            let "i--"
+            if [[ i -lt 0 ]]; then
+                exit 1
+            fi
+            d_remove_restriction "$i"
+        fi
     done
 
     if [[ $clear == True ]]; then
