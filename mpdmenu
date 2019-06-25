@@ -49,8 +49,6 @@ d_add_restriction() {
     local tag="$1"
     local arg="$2"
 
-    echo $filters
-
     if [[ "$arg" != "$all_name" ]]; then
         if [[ "$filters" != "(" ]]; then
             filters="$filters AND "
@@ -58,8 +56,6 @@ d_add_restriction() {
 
         filters="$filters ($tag == \"$arg\")"
     fi
-
-    echo $filters
 
 }
 
@@ -102,8 +98,6 @@ for arg do
         dmenu_args=( "${@:$i}" )
         break
     fi
-
-    echo "$i"
 
     case "$arg" in
         # Mode args
