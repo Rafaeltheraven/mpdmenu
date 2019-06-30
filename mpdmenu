@@ -120,6 +120,7 @@ case "$mode" in
 
     i=0
     max=$(( ${#argarray[@]} ))
+    argCount=0
 
     while [[ i -lt max ]]
     do
@@ -129,14 +130,16 @@ case "$mode" in
         if [[ "$arg" != "$back_name" ]]; then
             if [[ "$arg" != "$all_name" ]]; then
                 d_add_restriction "$tag" "$arg"
+                let "argCount++"
             fi
             let "i++"
         else
             let "i--"
+            let "argCount--"
             if [[ i -lt 0 ]]; then
                 exit 1
             fi
-            d_remove_restriction "$i"
+            d_remove_restriction "$argCount"
         fi
     done
 
