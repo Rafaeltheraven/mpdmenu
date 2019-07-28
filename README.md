@@ -50,9 +50,13 @@ It was made when I realised that mpdmenu needed a complete overhaul in the way i
 Instead, you have the following arguments:
 
 `-l` library mode (default)
+
 `-p` playlist mode
+
 `-t` track mode, same as library mode but allows you to pick a single track
+
 `-a` use `albumartist` tag instead of `artist`
+
 `-c` enable mpd's consume mode
 
 Regardless of arguments, you will have the flow
