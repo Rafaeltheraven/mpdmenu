@@ -61,4 +61,4 @@ Instead, you have the following arguments:
 
 Regardless of arguments, you will have the flow
 
-`genre` -> `albumartist` -> `album` (-> `track` if `-t` is enabled)
+`genre` -> `albumartist`/`artist` -> `album` (-> `track` if `-t` is enabled)
