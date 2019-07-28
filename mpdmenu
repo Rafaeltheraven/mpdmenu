@@ -33,7 +33,7 @@ d_show_tag() {
     mapfile -t search < <(mpc list $tag "$filter")
 
     if [[ "$title" == "Albumartist" ]]; then
-        title="Album Artist" #Just a special case
+        title="AlbumArtist" #Just a special case
     fi
 
     if (( ${#search[@]} > 1 )) ; then
