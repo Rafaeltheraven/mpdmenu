@@ -6,6 +6,7 @@ mode=library
 artistTag="artist"
 clear=False
 
+
 filters="("
 declare -A argarray
 
@@ -15,6 +16,7 @@ d_playlist() {
 
     title=$(mpc playlist -f "$format" | dmenu -p Track "${dmenu_args[@]}")
     printf '%s' "${title%% *}"
+
 
 }
 
@@ -35,6 +37,7 @@ d_show_tag() {
     fi
 
     if (( ${#search[@]} > 1 )) ; then
+
         {
             printf '%s\n' "$all_name"
             printf '%s\n' "$back_name"
@@ -44,6 +47,7 @@ d_show_tag() {
         printf '%s\n' "${search[0]}"
     fi
 }
+
 
 d_add_restriction() {
     local tag="$1"
@@ -56,6 +60,7 @@ d_add_restriction() {
 
         filters="$filters ($tag == \"$arg\")"
     fi
+
 
 }
 
@@ -154,6 +159,7 @@ case "$mode" in
     else
         mpc add /
     fi
+
 
         mpc play >/dev/null 2>&1
 
