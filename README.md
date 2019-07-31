@@ -13,7 +13,7 @@ There are 2 types of arguments, "search" arguments and "mode" arguments:
 
 `-p` - playlist mode, used to select a track from the current playlist (search arguments have no effect here)
 
-`-c` - enables mpd's consume mode
+`-c` - clears the current playlist before adding a new item
 
 ## Search Arguments
 `-a` - search by `artist` tag
@@ -57,7 +57,7 @@ Instead, you have the following arguments:
 
 `-a` use `albumartist` tag instead of `artist`
 
-`-c` enable mpd's consume mode
+`-c` clears the current playlist before adding a new item
 
 Regardless of arguments, you will have the flow
 
