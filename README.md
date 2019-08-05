@@ -36,6 +36,17 @@ You would call `mpdmenu -g -A -al -t`. Any input you give in the view of a previ
 search in the next tag (unless the `[ANY]` option is chosen). If no search arguments are passed, mpdmenu
 will just add all your music to the playlist.
 
+## Requirements
+`mpdmenu` makes frequent use of mcp search expression queries. Therefore, you need the following packages:
+
+1. `mpd >= 0.21`
+
+2. `libmpdclient >= 2.16`
+
+3. `mpc >= 0.31`
+
+4. `dmenu`
+
 # mpdmenu_classic
 
 `mpdmenu_classic` is an updated variant of the classic mpdmenu as originally forked from cdown. 
