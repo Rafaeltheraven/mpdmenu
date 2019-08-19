@@ -6,7 +6,7 @@ Pass mpdmenu arguments first, followed by any dmenu arguments. They are separate
 
     mpdmenu -p :: -sb '#000000'
 
-Any argument preceded with `--` will be passed along directly to MPC. This can be used, for example, to control
+Any argument of the format `--[arg]=[value]` will be passed along directly to MPC. This can be used, for example, to control
 the formatting shown or point `mpdmenu` to a specific MPD instance (using `--format` and `--host` respectively).
 
 There are 2 types of arguments, "search" arguments and "mode" arguments:
