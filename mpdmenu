@@ -229,7 +229,10 @@ case "$mode" in
 
 
     playlist)
-        mpc $mpc_args play "$(d_playlist)"
+        track="$(d_playlist)"
+        if [[ "$track" != "" ]]; then
+            mpc $mpc_args play "$track"
+        fi
     ;;
 
     control)
