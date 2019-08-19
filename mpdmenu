@@ -44,7 +44,7 @@ d_playlist() {
 
 d_show_controls() {
     i=0
-    if [[ "$argarray[@]" == "" ]]; then
+    if [[ "$argarray" == "" ]]; then
         argarray[0]="$toggle_name"
         argarray[1]="$next_name"
         argarray[2]="$prev_name"
@@ -180,7 +180,7 @@ case "$mode" in
     library)
 
     i=0
-    if [[ "$argarray[@]" == "" ]]; then
+    if [[ "$argarray" == "" ]]; then
         argarray[0]="genre"
         argarray[1]="albumartist"
         argarray[2]="album"
