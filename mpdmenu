@@ -2,22 +2,63 @@
 
 all_name='[ALL]'
 back_name='[BACK]'
+prev_name='[PREV]'
+next_name='[NEXT]'
+pause_name='[PAUSE]'
+play_name='[PLAY]'
+stop_name='[STOP]'
+clear_name='[CLEAR]'
+toggle_name='[PLAY/PAUSE]'
+nextal_name='[NEXT ALBUM]'
+preval_name='[PREV ALBUM]'
+rand_track='[RANDOM TRACK]'
+rand_album='[RANDOM ALBUM]'
+queue_track='[QUEUE TRACKS]'
+queue_album='[QUEUE ALBUMS]'
+
 mode=library
-artistTag="artist"
 clear=False
 
+mpc_args=()
+
+for arg in "$@"
+do
+	if [[ "$arg" = "--"* ]]; then
+		mpc_args+=("$arg")
+	fi
+done
 
 filters="("
 declare -A argarray
 
 d_playlist() {
+    # Simply show the playlist
     local format="%position% - %title% - %album% - %artist%"
     local title
 
-    title=$(mpc playlist -f "$format" | dmenu -p Track "${dmenu_args[@]}")
+    title=$(mpc $mpc_args playlist -f "$format" | dmenu -p Track "${dmenu_args[@]}")
     printf '%s' "${title%% *}"
 
 
+}
+
+d_show_controls() {
+    i=0
+    if [[ "$argarray[@]" == "" ]]; then
+        argarray[0]="$toggle_name"
+        argarray[1]="$next_name"
+        argarray[2]="$prev_name"
+        argarray[3]="$stop_name"
+    fi
+    max=$(( ${#argarray[@]} ))
+    {
+        while [[ $i -lt max ]]
+        do
+            opt="${argarray[$i]}"
+            printf '%s\n' "$opt"
+            let "i++"
+        done
+    } | dmenu -p Controls "${dmenu_args[@]}"
 }
 
 d_show_tag() {
@@ -26,11 +67,12 @@ d_show_tag() {
     local search
     local title="${tag^}"
 
+    # If no filters have been set yet, we set the filter to an empty string, which causes mpc to glitch and just show ALL entries
     if [[ "$filter" == "()" ]]; then
         filter=""
     fi
 
-    mapfile -t search < <(mpc list $tag "$filter")
+    mapfile -t search < <(mpc $mpc_args list $tag "$filter")
 
     if [[ "$title" == "Albumartist" ]]; then
         title="AlbumArtist" #Just a special case
@@ -60,8 +102,6 @@ d_add_restriction() {
 
         filters="$filters ($tag == \"$arg\")"
     fi
-
-
 }
 
 d_remove_restriction() {
@@ -106,15 +146,31 @@ for arg do
 
     case "$arg" in
         # Mode args
-        -l) mode=library ;;
-        -p) mode=playlist ;;
-        -c) clear=True ;;
+        -l) mode=library && let "i--" ;;
+        -p) mode=playlist && let "i--" ;;
+        -P) mode=playlist_al && let "i--" ;;
+        -c) clear=True && let "i--" ;;
+        -C) mode=control && let "i--" ;;
         # Sorting args
     	-t) argarray["$i"]="title" ;;
-    	-a) argarray["$i"]="artist" ;; 
+    	-a) argarray["$i"]="artist" ;;
         -A) argarray["$i"]="albumartist" ;;
         -al) argarray["$i"]="album" ;;
         -g) argarray["$i"]="genre" ;;
+        -prev) argarray["$i"]="$prev_name" ;;
+        -next) argarray["$i"]="$next_name" ;;
+        -toggle) argarray["$i"]="$toggle_name" ;;
+        -pause) argarray["$i"]="$pause_name" ;;
+        -play) argarray["$i"]="$play_name" ;;
+        -stop) argarray["$i"]="$stop_name" ;;
+        -clear) argarray["$i"]="$clear_name" ;;
+        -nextA) argarray["$i"]="$nextal_name" ;;
+        -prevA) argarray["$i"]="$preval_name" ;;
+        -rand) argarray["$i"]="$rand_track" ;;
+        -randA) argarray["$i"]="$rand_album" ;;
+        -queue) argarray["$i"]="$queue_track" ;;
+        -queueA) argarray["$i"]="$queue_album" ;;
+        *) argarray["$i"]="${arg#?}" ;;
     esac
 
     let "i++"
@@ -124,6 +180,12 @@ case "$mode" in
     library)
 
     i=0
+    if [[ "$argarray[@]" == "" ]]; then
+        argarray[0]="genre"
+        argarray[1]="albumartist"
+        argarray[2]="album"
+    fi
+
     max=$(( ${#argarray[@]} ))
     argCount=0
 
@@ -149,24 +211,48 @@ case "$mode" in
     done
 
     if [[ $clear == True ]]; then
-        mpc clear
+        mpc $mpc_args clear
     fi
 
     filters="${filters})"
 
     if [[ "$filters" != "()" ]]; then
-        mpc findadd "$filters"
+        mpc $mpc_args findadd "$filters"
     else
-        mpc add /
+        mpc $mpc_args add /
     fi
 
 
-        mpc play >/dev/null 2>&1
+        mpc $mpc_args play >/dev/null 2>&1
 
     ;;
 
 
     playlist)
-        mpc play "$(d_playlist)"
+        mpc $mpc_args play "$(d_playlist)"
+    ;;
+
+    control)
+    	fin=False
+    	while [[ $fin == False ]]
+    	do
+    		arg=$(d_show_controls)
+    		case "$arg" in
+                "$prev_name") mpc $mpc_args prev ;;
+                "$next_name") mpc $mpc_args next ;;
+                "$toggle_name") mpc $mpc_args toggle ;;
+                "$pause_name") mpc $mpc_args pause ;;
+                "$play_name") mpc $mpc_args play ;;
+                "$stop_name") mpc $mpc_args stop ;;
+                "$clear_name") mpc $mpc_args clear ;;
+                "$nextal_name") mpa $mpc_args next ;;
+                "$preval_name") mpa $mpc_args prev ;;
+                "$rand_track") mpa $mpc_args random -t ;;
+                "$rand_album") mpa $mpc_args random ;;
+                "$queue_track") mpa $mpc_args radio -t ;;
+                "$queue_album") mpa $mpc_args radio ;;
+                *) fin=True ;;
+            esac
+        done
     ;;
 esac
