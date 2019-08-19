@@ -36,7 +36,7 @@ d_playlist() {
     local format="%position% - %title% - %album% - %artist%"
     local title
 
-    title=$(mpc $mpc_args playlist -f "$format" | dmenu -p Track "${dmenu_args[@]}")
+    title=$(mpc playlist -f "$format" $mpc_args | dmenu -p Track "${dmenu_args[@]}")
     printf '%s' "${title%% *}"
 
 
