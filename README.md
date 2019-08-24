@@ -90,6 +90,17 @@ add the following controls to the control menu:
 
 Of note should be that the queue options will take control of your `mpdmenu` until you quit.
 
+## Requirements
+`mpdmenu` makes frequent use of mcp search expression queries. Therefore, you need the following packages:
+
+1. `mpd >= 0.21`
+
+2. `libmpdclient >= 2.16`
+
+3. `mpc >= 0.31`
+
+4. `dmenu`
+
 # mpdmenu_classic
 
 `mpdmenu_classic` is an updated variant of the classic mpdmenu as originally forked from cdown. 
