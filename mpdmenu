@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 all_name='[ALL]'
 back_name='[BACK]'
@@ -254,7 +254,8 @@ case "$mode" in
                 "$rand_album") mpa $mpc_args random ;;
                 "$queue_track") mpa $mpc_args radio -t ;;
                 "$queue_album") mpa $mpc_args radio ;;
-                *) fin=True ;;
+                "") fin=True ;;
+                *) mpc $mpc_args $arg ;;
             esac
         done
     ;;
