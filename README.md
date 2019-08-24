@@ -65,7 +65,11 @@ for these modules to dmenu by using the following arguments.
 
 `-clear` - Clear the MPD playlist
 
+`-[mpc supported action]` - Will pass the given action directly to mpc. For example, `-crop` will perform `mpc crop`.
+
 If no arguments are given, the `toggle`, `next`, `prev` and `stop` buttons will be added.
+
+To leave the controls menu, simple press escape
 
 ### Integration with MPA
 `mpdmenu` also supports some integration with my other project, `mpa` (found at github.com/rafaeltheraven/mpa), which is
