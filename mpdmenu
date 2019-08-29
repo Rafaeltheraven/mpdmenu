@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 all_name='[ALL]'
 back_name='[BACK]'
@@ -40,6 +40,14 @@ d_playlist() {
     printf '%s' "${title%% *}"
 
 
+}
+
+d_playlist_al() {
+    local title
+    local playlist=$(mpa playlist $mpc_args)
+
+    title=$(echo "$playlist" | dmenu -p Albums "${dmenu_args[@]}")
+    printf '%s' "$title"
 }
 
 d_show_controls() {
@@ -232,6 +240,22 @@ case "$mode" in
         track="$(d_playlist)"
         if [[ "$track" != "" ]]; then
             mpc $mpc_args play "$track"
+        fi
+    ;;
+
+    playlist_al)
+        album="$(d_playlist_al)"
+        if [[ "$album" != "" ]]; then
+            playlist=$(mpa playlist $mpc_args)
+            readarray -t splitted <<<"$playlist"
+            count=0
+            prev=""
+            while [[ "$prev" != "$album" ]]
+            do
+                prev="${splitted[count]}"
+                let "count++"
+            done
+            mpa $mpc_args play "$count"
         fi
     ;;
 
