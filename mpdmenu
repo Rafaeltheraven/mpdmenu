@@ -237,6 +237,9 @@ case "$mode" in
 
     control)
     	fin=False
+        if [[ $clear = True ]]; then
+            arg2="-c"
+        fi
     	while [[ $fin == False ]]
     	do
     		arg=$(d_show_controls)
@@ -248,12 +251,12 @@ case "$mode" in
                 "$play_name") mpc $mpc_args play ;;
                 "$stop_name") mpc $mpc_args stop ;;
                 "$clear_name") mpc $mpc_args clear ;;
-                "$nextal_name") mpa $mpc_args next ;;
-                "$preval_name") mpa $mpc_args prev ;;
-                "$rand_track") mpa $mpc_args random -t ;;
-                "$rand_album") mpa $mpc_args random ;;
-                "$queue_track") mpa $mpc_args radio -t ;;
-                "$queue_album") mpa $mpc_args radio ;;
+                "$nextal_name") mpa $mpc_args next $arg2 ;;
+                "$preval_name") mpa $mpc_args prev $arg2 ;;
+                "$rand_track") mpa $mpc_args random -t $arg2 ;;
+                "$rand_album") mpa $mpc_args random $arg2 ;;
+                "$queue_track") mpa $mpc_args radio -t $arg2 ;;
+                "$queue_album") mpa $mpc_args radio $arg2 ;;
                 "") fin=True ;;
                 *) mpc $mpc_args $arg ;;
             esac
