@@ -255,7 +255,10 @@ case "$mode" in
                 prev="${splitted[count]}"
                 let "count++"
             done
-            mpa $mpc_args play "$count"
+            if [[ $clear = True ]]; then
+                arg2="-c"
+            fi
+            mpa $mpc_args play "$count" "$arg2"
         fi
     ;;
 
