@@ -90,6 +90,8 @@ add the following controls to the control menu:
 
 Of note should be that the queue options will take control of your `mpdmenu` until you quit.
 
+If you pass the `-c` argument to `mpdmenu` and use any of the `mpa` controls. The `-c` will be passed on the `mpa`.
+
 ## Requirements
 `mpdmenu` makes frequent use of mcp search expression queries. Therefore, you need the following packages:
 
