@@ -90,6 +90,9 @@ add the following controls to the control menu:
 
 Of note should be that the queue options will take control of your `mpdmenu` until you quit.
 
+Furthermore, mpa also adds support for the `-P` mode argument, which is the album playlist mode, allowing
+you to select an album to play from the current playlist.
+
 If you pass the `-c` argument to `mpdmenu` and use any of the `mpa` controls. The `-c` will be passed on the `mpa`.
 
 ## Requirements
