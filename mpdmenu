@@ -76,10 +76,10 @@ d_show_tag() {
 
     # If no filters have been set yet, we set the filter to an empty string, which causes mpc to glitch and just show ALL entries
     if [[ "$filter" == "()" ]]; then
-        filter=""
+        mapfile -t search < <(mpc $mpc_args list $tag)
+    else
+	mapfile -t search < <(mpc $mpc_args list $tag "$filter")
     fi
-
-    mapfile -t search < <(mpc $mpc_args list $tag "$filter")
 
     if [[ "$title" == "Albumartist" ]]; then
         title="AlbumArtist" #Just a special case
