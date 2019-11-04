@@ -38,8 +38,6 @@ d_playlist() {
 
     title=$(mpc playlist -f "$format" $mpc_args | dmenu -p Track "${dmenu_args[@]}")
     printf '%s' "${title%% *}"
-
-
 }
 
 d_playlist_al() {
@@ -74,6 +72,7 @@ d_show_tag() {
     local filter="${filters})"
     local search
     local title="${tag^}"
+    argCount="$2"
 
     # If no filters have been set yet, we set the filter to an empty string, which causes mpc to glitch and just show ALL entries
     if [[ "$filter" == "()" ]]; then
@@ -94,8 +93,10 @@ d_show_tag() {
             printf '%s\n' "${search[@]}" | sort -f
         } | dmenu -p $title "${dmenu_args[@]}"
     else
+    	let "argCount--"
         printf '%s\n' "${search[0]}"
     fi
+    return $argCount
 }
 
 
@@ -119,12 +120,12 @@ d_remove_restriction() {
     local argCount="$1"
     local filter=""
     local i=0
-    while [[ i -lt argsLength && foundArgs -lt argCount ]]
+    while [[ $i -lt $argsLength && $foundArgs -lt $argCount ]]
     do
         local word="${args[$i]}"
         local wordLength="${#word}"
         local j=0
-        while [[ j -lt wordLength && foundArgs -lt argCount ]]
+        while [[ $j -lt $wordLength && $foundArgs -lt $argCount ]]
         do
             local char="${word:j:1}"
             if [[ "$char" = ")" ]]; then
@@ -133,7 +134,7 @@ d_remove_restriction() {
             filter="$filter$char"
             let "j++"
         done
-        if [[ foundArgs -lt argCount ]]; then
+        if [[ $foundArgs -lt $argCount ]]; then
             filter="$filter "
         fi
         let "i++"
@@ -184,6 +185,8 @@ for arg do
     let "i++"
 done
 
+argCount=0
+
 case "$mode" in
     library)
 
@@ -200,20 +203,25 @@ case "$mode" in
     while [[ i -lt max ]]
     do
         tag="${argarray[$i]}"
-        arg=$(d_show_tag "$tag")
+        arg=$(d_show_tag "$tag" "$argCount")
+        argCount=$?
         [[ $arg ]] || exit 1
         if [[ "$arg" != "$back_name" ]]; then
             if [[ "$arg" != "$all_name" ]]; then
                 d_add_restriction "$tag" "$arg"
-                let "argCount++"
             fi
+            let "argCount++"
             let "i++"
         else
             let "i--"
-            let "argCount--"
             if [[ i -lt 0 ]]; then
                 exit 1
             fi
+            let "argCount--"
+            while [[ i -gt argCount ]]
+            do
+            	let "i--"
+            done
             d_remove_restriction "$argCount"
         fi
     done
