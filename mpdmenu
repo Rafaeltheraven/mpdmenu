@@ -20,12 +20,18 @@ mode=library
 clear=False
 
 mpc_args=()
+menu_args=()
 
 for arg in "$@"
 do
-	if [[ "$arg" = "--"* ]]; then
+    if [[ "$arg" == --*=* ]]; then
+        mpc_args+=("${arg%%=*}")
+        mpc_args+=("${arg#*=}")
+	elif [[ "$arg" == --* ]]; then
 		mpc_args+=("$arg")
-	fi
+	else
+        menu_args+=("$arg")
+    fi
 done
 
 filters="("
@@ -147,7 +153,7 @@ d_remove_restriction() {
 
 i=0
 
-for arg do
+for arg in "$menu_args"; do
     if [[ $arg == :: ]]; then
         dmenu_args=( "${@:$i}" )
         break
