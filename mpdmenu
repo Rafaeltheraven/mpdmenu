@@ -42,13 +42,13 @@ d_playlist() {
     local format="%position% - %title% - %album% - %artist%"
     local title
 
-    title=$(mpc playlist -f "$format" $mpc_args | dmenu -p Track "${dmenu_args[@]}")
+    title=$(mpc playlist -f "$format" "${mpc_args[@]}" | dmenu -p Track "${dmenu_args[@]}")
     printf '%s' "${title%% *}"
 }
 
 d_playlist_al() {
     local title
-    local playlist=$(mpa playlist $mpc_args)
+    local playlist=$(mpa playlist "${mpc_args[@]}")
 
     title=$(echo "$playlist" | dmenu -p Albums "${dmenu_args[@]}")
     printf '%s' "$title"
@@ -82,9 +82,9 @@ d_show_tag() {
 
     # If no filters have been set yet, we set the filter to an empty string, which causes mpc to glitch and just show ALL entries
     if [[ "$filter" == "()" ]]; then
-        mapfile -t search < <(mpc $mpc_args list $tag)
+        mapfile -t search < <(mpc "${mpc_args[@]}" list $tag)
     else
-	mapfile -t search < <(mpc $mpc_args list $tag "$filter")
+	mapfile -t search < <(mpc "${mpc_args[@]}" list $tag "$filter")
     fi
 
     if [[ "$title" == "Albumartist" ]]; then
