@@ -233,19 +233,19 @@ case "$mode" in
     done
 
     if [[ $clear == True ]]; then
-        mpc $mpc_args clear
+        mpc "${mpc_args[@]}" clear
     fi
 
     filters="${filters})"
 
     if [[ "$filters" != "()" ]]; then
-        mpc $mpc_args findadd "$filters"
+        mpc "${mpc_args[@]}" findadd "$filters"
     else
-        mpc $mpc_args add /
+        mpc "${mpc_args[@]}" add /
     fi
 
 
-        mpc $mpc_args play >/dev/null 2>&1
+        mpc "${mpc_args[@]}" play >/dev/null 2>&1
 
     ;;
 
@@ -253,14 +253,14 @@ case "$mode" in
     playlist)
         track="$(d_playlist)"
         if [[ "$track" != "" ]]; then
-            mpc $mpc_args play "$track"
+            mpc "${mpc_args[@]}" play "$track"
         fi
     ;;
 
     playlist_al)
         album="$(d_playlist_al)"
         if [[ "$album" != "" ]]; then
-            playlist=$(mpa playlist $mpc_args)
+            playlist=$(mpa playlist "${mpc_args[@]}")
             readarray -t splitted <<<"$playlist"
             count=0
             prev=""
@@ -272,7 +272,7 @@ case "$mode" in
             if [[ $clear = True ]]; then
                 arg2="-c"
             fi
-            mpa $mpc_args play "$count" "$arg2"
+            mpa "${mpc_args[@]}" play "$count" "$arg2"
         fi
     ;;
 
@@ -285,21 +285,21 @@ case "$mode" in
     	do
     		arg=$(d_show_controls)
     		case "$arg" in
-                "$prev_name") mpc $mpc_args prev ;;
-                "$next_name") mpc $mpc_args next ;;
-                "$toggle_name") mpc $mpc_args toggle ;;
-                "$pause_name") mpc $mpc_args pause ;;
-                "$play_name") mpc $mpc_args play ;;
-                "$stop_name") mpc $mpc_args stop ;;
-                "$clear_name") mpc $mpc_args clear ;;
-                "$nextal_name") mpa $mpc_args next $arg2 ;;
-                "$preval_name") mpa $mpc_args prev $arg2 ;;
-                "$rand_track") mpa $mpc_args random -t $arg2 ;;
-                "$rand_album") mpa $mpc_args random $arg2 ;;
-                "$queue_track") mpa $mpc_args radio -t $arg2 ;;
-                "$queue_album") mpa $mpc_args radio $arg2 ;;
+                "$prev_name") mpc "${mpc_args[@]}" prev ;;
+                "$next_name") mpc "${mpc_args[@]}" next ;;
+                "$toggle_name") mpc "${mpc_args[@]}" toggle ;;
+                "$pause_name") mpc "${mpc_args[@]}" pause ;;
+                "$play_name") mpc "${mpc_args[@]}" play ;;
+                "$stop_name") mpc "${mpc_args[@]}" stop ;;
+                "$clear_name") mpc "${mpc_args[@]}" clear ;;
+                "$nextal_name") mpa "${mpc_args[@]}" next $arg2 ;;
+                "$preval_name") mpa "${mpc_args[@]}" prev $arg2 ;;
+                "$rand_track") mpa "${mpc_args[@]}" random -t $arg2 ;;
+                "$rand_album") mpa "${mpc_args[@]}" random $arg2 ;;
+                "$queue_track") mpa "${mpc_args[@]}" radio -t $arg2 ;;
+                "$queue_album") mpa "${mpc_args[@]}" radio $arg2 ;;
                 "") fin=True ;;
-                *) mpc $mpc_args $arg ;;
+                *) mpc "${mpc_args[@]}" $arg ;;
             esac
         done
     ;;
