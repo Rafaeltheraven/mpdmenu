@@ -20,6 +20,7 @@ mode=library
 clear=False
 
 mpc_args=()
+mpa_args=()
 menu_args=()
 
 for arg in "$@"
@@ -27,8 +28,10 @@ do
     if [[ "$arg" == --*=* ]]; then
         mpc_args+=("${arg%%=*}")
         mpc_args+=("${arg#*=}")
+        mpa_args+=("$arg")
 	elif [[ "$arg" == --* ]]; then
 		mpc_args+=("$arg")
+        mpc_args+=("$arg")
 	else
         menu_args+=("$arg")
     fi
@@ -292,12 +295,12 @@ case "$mode" in
                 "$play_name") mpc "${mpc_args[@]}" play ;;
                 "$stop_name") mpc "${mpc_args[@]}" stop ;;
                 "$clear_name") mpc "${mpc_args[@]}" clear ;;
-                "$nextal_name") mpa "${mpc_args[@]}" next $arg2 ;;
-                "$preval_name") mpa "${mpc_args[@]}" prev $arg2 ;;
-                "$rand_track") mpa "${mpc_args[@]}" random -t $arg2 ;;
-                "$rand_album") mpa "${mpc_args[@]}" random $arg2 ;;
-                "$queue_track") mpa "${mpc_args[@]}" radio -t $arg2 ;;
-                "$queue_album") mpa "${mpc_args[@]}" radio $arg2 ;;
+                "$nextal_name") mpa "${mpa_args[@]}" next $arg2 ;;
+                "$preval_name") mpa "${mpa_args[@]}" prev $arg2 ;;
+                "$rand_track") mpa "${mpa_args[@]}" random -t $arg2 ;;
+                "$rand_album") mpa "${mpa_args[@]}" random $arg2 ;;
+                "$queue_track") mpa "${mpa_args[@]}" radio -t $arg2 ;;
+                "$queue_album") mpa "${mpa_args[@]}" radio $arg2 ;;
                 "") fin=True ;;
                 *) mpc "${mpc_args[@]}" $arg ;;
             esac
